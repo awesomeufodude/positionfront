@@ -29,6 +29,9 @@ Here’s the full updated README with the new section about hexagonal architectu
 
 Article Nexus is a platform that allows users to create articles, update them, add ratings, mark articles as favorites, and more. It leverages powerful tools like React Query and Redux for state management. The project is designed to ensure high scalability, modularity, and maintainability, adhering to best practices like hexagonal architecture.
 
+Deployed Backend urls: https://positionback-b7f5793f9d74.herokuapp.com
+Deployed Frontend urls: https://positionfront.vercel.app
+
 ---
 
 ## Getting Started
