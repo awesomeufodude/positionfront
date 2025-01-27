@@ -10,19 +10,18 @@ import { Plus } from 'lucide-react'
 import ArticlesByCategories from '@/features/categories/components/ArticlesByCategories'
 
 const ArticleList: React.FC = () => {
-  const [searchParams, setSearchParams] = useSearchParams() // Manages query parameters for pagination.
+  const [searchParams, setSearchParams] = useSearchParams()
 
-  const page = parseInt(searchParams.get('page') || '1', 10) // Current page number.
-  const limit = parseInt(searchParams.get('limit') || '4', 10) // Number of articles per page.
+  const page = parseInt(searchParams.get('page') || '1', 10)
+  const limit = parseInt(searchParams.get('limit') || '4', 10)
 
-  const { data, isLoading, error } = useFetchArticles({ page, limit }) // Fetch articles with pagination.
+  const { data, isLoading, error } = useFetchArticles({ page, limit })
 
-  // Handles page changes and updates query parameters.
   const handlePageChange = (newPage: number, limit: number) => {
     setSearchParams({ page: String(newPage), limit: String(limit) })
   }
 
-  if (error) return <div>Error fetching articles: {error}</div> // Display error message if fetching fails.
+  if (error) return <div>Error fetching articles: {error}</div>
 
   return (
     <div className="p-4 max-w-6xl mx-auto">
@@ -42,10 +41,10 @@ const ArticleList: React.FC = () => {
       ) : (
         <>
           <ArticleTable
-            data={data.data} // Table data.
-            columns={articleColumns} // Table column definitions.
-            pagination={data.pagination} // Pagination details.
-            onPageChange={handlePageChange} // Page change handler.
+            data={data.data}
+            columns={articleColumns}
+            pagination={data.pagination}
+            onPageChange={handlePageChange}
           />
           <ArticlesByCategories />
         </>

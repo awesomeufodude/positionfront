@@ -28,6 +28,7 @@ const CategorySelector: FC = () => {
             checked={selectedCategory === category.id}
             onChange={() => handleSelect(category.id)}
             className="mr-2"
+            data-testid="56be2619-f8a0-44ae-9e50-615433664395"
           />
           {category.name}
         </label>

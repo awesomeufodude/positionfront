@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button'
 import useFetchArticle from '../hooks/useFetchArticle'
 import { setSelectedCategory } from '@/features/categories/redux/categorySlice'
 import RateComponent from '@/components/RateComponent'
+import useDismissModal from '../hooks/useDismisModal'
+import toast from 'react-hot-toast'
 
 interface ArticleFormProps {
   type: 'delete' | 'edit' | 'create'
@@ -19,15 +21,16 @@ interface ArticleFormProps {
 const ArticleForm: FC<ArticleFormProps> = ({ type, articleId }) => {
   const dispatch = useDispatch<AppDispatch>()
   const authorId = useSelector((state: RootState) => state.auth.user?.id)
+  const {dismiss} = useDismissModal()
   const selectedCategory = useSelector((state: RootState) => state.category.selectedCategory)
 
-  const { article, error, resetArticle } = useFetchArticle(articleId || '')
+  const { article, isLoading: isFetching, error, updateArticle, resetArticle } = useFetchArticle(articleId || '')
 
   const { mutate: createArticle, isLoading: isCreating } = useCreateArticle()
   const { mutate: updateArticleMutate, isLoading: isUpdating } = useUpdateArticle()
   const { mutate: deleteArticle, isLoading: isDeleting } = useDeleteArticle()
 
-  const isLoading = isCreating || isUpdating || isDeleting
+  const isLoading = isFetching || isCreating || isUpdating || isDeleting
 
   const [localTitle, setLocalTitle] = useState('')
   const [localDescription, setLocalDescription] = useState('')
@@ -47,8 +50,12 @@ const ArticleForm: FC<ArticleFormProps> = ({ type, articleId }) => {
 
     if (type === 'create' && authorId) {
       createArticle(
-        { title: localTitle, description: localDescription, categoryId: selectedCategory, authorId, rating },
-        { onSuccess: resetArticle },
+        { title: localTitle, description: localDescription, categoryId: selectedCategory, authorId, rating: rating },
+        { onSuccess: () => {
+          dismiss();
+          resetArticle();
+          toast.success('Article created successfully');
+        } },
       )
     } else if (type === 'edit' && articleId) {
       updateArticleMutate(
@@ -56,10 +63,22 @@ const ArticleForm: FC<ArticleFormProps> = ({ type, articleId }) => {
           id: articleId,
           article: { title: localTitle, description: localDescription, categoryId: selectedCategory, rating },
         },
-        { onSuccess: resetArticle },
+        {
+          onSuccess: () => {
+            dismiss();
+            resetArticle();
+            toast.success('Article updated successfully');
+          },
+        },
       )
     } else if (type === 'delete' && articleId) {
-      deleteArticle(articleId, { onSuccess: resetArticle })
+      deleteArticle(articleId, {
+        onSuccess: () => {
+          dismiss();
+          resetArticle();
+          toast.success('Article deleted successfully')
+        },
+      })
     }
   }
 
@@ -99,6 +118,7 @@ const ArticleForm: FC<ArticleFormProps> = ({ type, articleId }) => {
             placeholder="Type your title"
             value={localTitle}
             onChange={(e) => setLocalTitle(e.target.value)}
+            className='my-2'
           />
           <p className="text-sm text-gray-500">
             Enter the <b>{article?.title}</b> to confirm deletion

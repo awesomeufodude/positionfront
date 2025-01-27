@@ -14,21 +14,13 @@ import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-
-interface Pagination {
-  total: number // Total number of items.
-  page: number // Current page number.
-  limit: number // Number of items per page.
-  totalPages: number // Total number of pages.
-  hasNextPage: boolean // Indicates if there is a next page.
-  hasPreviousPage: boolean // Indicates if there is a previous page.
-}
+import { Pagination } from '@/types/articleTypes'
 
 interface ArticleTableProps<T> {
-  data: T[] // Data to be displayed in the table.
-  columns: ColumnDef<T>[] // Column definitions for the table.
-  pagination: Pagination // Pagination information.
-  onPageChange: (page: number, limit: number) => void // Function to handle page changes.
+  data: T[]
+  columns: ColumnDef<T>[]
+  pagination: Pagination
+  onPageChange: (page: number, limit: number) => void
 }
 
 const ArticleTable = <T,>({ data, columns, pagination, onPageChange }: ArticleTableProps<T>) => {
@@ -38,11 +30,13 @@ const ArticleTable = <T,>({ data, columns, pagination, onPageChange }: ArticleTa
   const [searchParams, setSearchParams] = useSearchParams()
   const limit = parseInt(searchParams.get('limit') || '4', 10)
 
-  // Custom global filter function.
-  const customGlobalFilter: FilterFn<any> = (row, filterValue) => {
-    return Object.values(row.original).some((value) =>
-      String(value).toLowerCase().includes(String(filterValue).toLowerCase()),
-    )
+  const globalFilterFn: FilterFn<T> = (row, columnId, filterValue: string) => {
+    const search = filterValue.toLowerCase()
+
+    let value = row.getValue(columnId) as string
+    if (typeof value === 'number') value = String(value)
+
+    return value?.toLowerCase().includes(search)
   }
 
   const table = useReactTable({
@@ -53,7 +47,7 @@ const ArticleTable = <T,>({ data, columns, pagination, onPageChange }: ArticleTa
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onRowSelectionChange: setRowSelection,
-    globalFilterFn: customGlobalFilter,
+    globalFilterFn: globalFilterFn,
     onGlobalFilterChange: setGlobalFilter as OnChangeFn<string>,
     state: {
       sorting,
@@ -62,14 +56,12 @@ const ArticleTable = <T,>({ data, columns, pagination, onPageChange }: ArticleTa
     },
   })
 
-  // Handles moving to the previous page.
   const handlePreviousPage = () => {
     if (pagination.hasPreviousPage) {
       onPageChange(pagination.page - 1, limit)
     }
   }
 
-  // Handles moving to the next page.
   const handleNextPage = () => {
     if (pagination.hasNextPage) {
       onPageChange(pagination.page + 1, limit)

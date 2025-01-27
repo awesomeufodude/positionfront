@@ -13,17 +13,17 @@ const HeartCheckBox: FC<HeartCheckBoxProps> = ({ id, defaultChecked = false, dis
 
   // Handles toggling of the favorite state.
   const handleToggleFavorite = async () => {
-    const previousState = isFavorite
-    setIsLoading(true)
-    setIsFavorite(!isFavorite)
+    const updatedState = !isFavorite // Toggle the favorite state.
+    setIsFavorite(updatedState) // Optimistically update the state.
+    setIsLoading(true) // Disable the input while loading.
 
     try {
       await toggleFavorite(id) // API call to toggle favorite state.
     } catch (error) {
       console.error('Failed to toggle favorite:', error)
-      setIsFavorite(previousState) // Revert to previous state on failure.
+      setIsFavorite(!updatedState) // Revert to previous state on failure.
     } finally {
-      setIsLoading(false)
+      setIsLoading(false) // Re-enable the input.
     }
   }
 
@@ -36,7 +36,7 @@ const HeartCheckBox: FC<HeartCheckBoxProps> = ({ id, defaultChecked = false, dis
           type="checkbox"
           checked={isFavorite}
           onChange={handleToggleFavorite}
-          className="disabled:cursor-not-allowed"
+          className={`disabled:cursor-not-allowed ${isLoading ? 'cursor-wait' : ''}`} // Show loading cursor when updating.
         />
         <div className={`checkmark ${isFavorite ? 'filled' : ''}`}>
           <svg viewBox="0 0 256 256">
@@ -49,6 +49,8 @@ const HeartCheckBox: FC<HeartCheckBoxProps> = ({ id, defaultChecked = false, dis
             ></path>
           </svg>
         </div>
+        {isLoading && <div className="absolute inset-0 bg-gray-200 opacity-50 cursor-not-allowed"></div>}{' '}
+        {/* Overlay to show not allowed state */}
       </label>
     </div>
   )
