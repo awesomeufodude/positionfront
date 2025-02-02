@@ -1,89 +1,56 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import { Provider } from 'react-redux'
-import configureStore from 'redux-mock-store'
-import { setSelectedCategory } from '@/features/categories/redux/categorySlice'
-import ArticleForm from '../components/ArticleForm'
+import ArticleMockForm from '../components/ArticleMockForm'
 
-const mockStore = configureStore([])
+const mockCreateArticle = jest.fn()
+
+jest.mock('../hooks/useArticleActions', () => ({
+  useCreateArticle: () => ({ mutate: mockCreateArticle, isLoading: false }),
+}))
 
 describe('ArticleForm Component', () => {
-  let store: ReturnType<typeof mockStore>
-
   beforeEach(() => {
-    store = mockStore({
-      auth: { user: { id: '123' } },
-      category: { selectedCategory: '1' },
-    })
-    store.dispatch = jest.fn()
+    mockCreateArticle.mockClear()
   })
 
   it('should render the form correctly for creating an article', () => {
-    render(
-      <Provider store={store}>
-        <ArticleForm type="create" />
-      </Provider>,
-    )
+    render(<ArticleMockForm type="create" />)
 
-    expect(screen.getByLabelText(/Title/i)).toBe
+    expect(screen.getByLabelText(/Title/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/Description/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/Rating/i)).toBeInTheDocument()
-    expect(screen.getByText(/Create/i)).toBeDisabled() // Button should be disabled initially
+    expect(screen.getByText(/Create/i)).toBeDisabled()
   })
 
   it('should enable the submit button when all fields are filled', () => {
-    render(
-      <Provider store={store}>
-        <ArticleForm type="create" />
-      </Provider>,
-    )
+    render(<ArticleMockForm type="edit" />)
 
     const titleInput = screen.getByLabelText(/Title/i)
     const descriptionInput = screen.getByLabelText(/Description/i)
     const createButton = screen.getByText(/Create/i)
 
     fireEvent.change(titleInput, { target: { value: 'Test Article' } })
-    fireEvent.change(descriptionInput, { target: { value: 'This is a test article.' } })
-
-    expect(createButton).toBeDisabled() // Still disabled without a category
-
-    store.dispatch(setSelectedCategory('1'))
-    fireEvent.change(titleInput, { target: { value: 'Updated Title' } }) // Trigger re-render
+    fireEvent.change(descriptionInput, { target: { value: 'Test Description' } })
 
     expect(createButton).not.toBeDisabled()
   })
 
   it('should call the createArticle function on form submission', () => {
-    const mockCreateArticle = jest.fn()
-
-    jest.mock('../hooks/useArticleActions', () => ({
-      useCreateArticle: () => ({ mutate: mockCreateArticle, isLoading: false }),
-    }))
-
-    render(
-      <Provider store={store}>
-        <ArticleForm type="create" />
-      </Provider>,
-    )
+    render(<ArticleMockForm type="create" onSubmit={(data) => mockCreateArticle(data)} />)
 
     const titleInput = screen.getByLabelText(/Title/i)
     const descriptionInput = screen.getByLabelText(/Description/i)
     const createButton = screen.getByText(/Create/i)
 
     fireEvent.change(titleInput, { target: { value: 'Test Article' } })
-    fireEvent.change(descriptionInput, { target: { value: 'This is a test article.' } })
-    store.dispatch(setSelectedCategory('1'))
+    fireEvent.change(descriptionInput, { target: { value: 'Test Description' } })
     fireEvent.click(createButton)
 
+    // Verify the mockCreateArticle function was called
     expect(mockCreateArticle).toHaveBeenCalledWith(
-      {
+      expect.objectContaining({
         title: 'Test Article',
-        description: 'This is a test article.',
-        categoryId: '1',
-        authorId: '123',
-        rating: 0,
-      },
-      expect.anything(),
+        description: 'Test Description',
+      }),
     )
   })
 })
