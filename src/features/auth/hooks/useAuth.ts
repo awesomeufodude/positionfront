@@ -79,6 +79,9 @@ export const useRestoreSession = () => {
       onSettled: () => {
         dispatch(setLoading(false)) // Reset loading state after query settles.
       },
+      onError: () => {
+        dispatch(sessionCheckComplete()) // Mark session check as complete on error.
+      },
     },
   )
 }
