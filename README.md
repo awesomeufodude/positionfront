@@ -37,11 +37,20 @@ Deployed Frontend urls: https://positionfront.vercel.app
 ## Getting Started
 
 ### Prerequisites
-Ensure you have the following installed:
-- Node.js (v16 or higher recommended)
-- npm (v8 or higher) or yarn
-- Deployed Backend urls (https://positionback-b7f5793f9d74.herokuapp.com) place this in .env file when running locally.
+Here's the revised version with grammar and clarity improvements:
 
+---
+
+Ensure you have the following installed:
+
+- **Node.js** (v20 or higher recommended)  
+- **npm** (v10 or higher) or **yarn**  
+- **Backend URLs:** Use the deployed backend URL: `https://positionback-b7f5793f9d74.herokuapp.com`. Add this URL to your `.env` file for both the `VITE_PROD_BACKEND_URL` and `VITE_DEV_BACKEND_URL` variables when running the frontend project locally.
+
+- **Local Backend Setup (Optional):**  
+  If you want to use a locally deployed backend, start the backend server first. Then, update your `.env` file with the following values in frontend:  
+  - `VITE_PROD_BACKEND_URL`: `https://positionback-b7f5793f9d74.herokuapp.com`  
+  - `VITE_DEV_BACKEND_URL`: `http://localhost:9090`
 ---
 
 ### Steps to Install Dependencies
